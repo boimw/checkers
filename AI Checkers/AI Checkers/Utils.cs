@@ -206,7 +206,7 @@ namespace AICheckers
                     }
                 }
             }
-
+              
             //Dole lijevo
             if (Board[priorPositions[0].Y, priorPositions[0].X].Colour != CheckerColour.Black || Board[priorPositions[0].Y, priorPositions[0].X].King)
             {
@@ -234,7 +234,7 @@ namespace AICheckers
                             priorPositions.Add(newDest);
 
                             //Use recursion to find multiple captures
-                            OpenSquares.AddRange(GetOpenSquaresBlack(Board, new Point(checker.X + 2, checker.Y - 2), move, priorPositions));
+                            OpenSquares.AddRange(GetOpenSquaresBlack(Board, new Point(checker.X - 2, checker.Y + 2), move, priorPositions));
                         }
                     }
                 }

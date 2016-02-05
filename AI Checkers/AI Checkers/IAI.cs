@@ -9,5 +9,6 @@ namespace AICheckers
     {
         CheckerColour Colour { get; set; }
         KeyValuePair<Square[,], float> MinMax(Square[,] Board);
+        KeyValuePair<Square[,], float> MinMax2(Square[,] Board);
     }
 }

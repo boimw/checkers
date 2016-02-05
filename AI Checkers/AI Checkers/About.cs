@@ -15,5 +15,11 @@ namespace AICheckers
         {
             InitializeComponent();
         }
+
+        private void About_TextChanged(object sender, EventArgs e)
+        {
+            String text = "Jana je car.";
+            textBox1.Text = text;
+        }
     }
 }

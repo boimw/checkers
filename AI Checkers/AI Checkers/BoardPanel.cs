@@ -12,6 +12,7 @@ namespace AICheckers
     public class BoardPanel : Panel
     {
         IAI AI = null;
+        IAI AI2 = null;
 
         //Assets
         Image checkerRed = Resources.checkerred;
@@ -19,11 +20,12 @@ namespace AICheckers
         Image checkerBlack = Resources.checkerblack;
         Image checkerBlackKing = Resources.checkerblackking;
         int squareWidth = 0;
+        bool AITurnBool = false;
         Point selectedChecker = new Point(-1, -1);
         List<Move> possibleMoves = new List<Move>();
         public static CheckerColour currentTurn = CheckerColour.Red;
 
-        Square[,] Board = new Square[8,8];
+        Square[,] Board = new Square[8, 8];
 
         public BoardPanel()
             : base()
@@ -50,7 +52,8 @@ namespace AICheckers
                 }
                 for (int j = offset; j < 8; j += 2)
                 {
-                    if (i < 3)  {
+                    if (i < 3)
+                    {
                         Board[i, j].Colour = CheckerColour.Red;
                     }
                     if (i > 4)
@@ -62,6 +65,8 @@ namespace AICheckers
 
             AI = new AI_Tree();
             AI.Colour = CheckerColour.Black;
+            AI2 = new AI_Tree();
+            AI2.Colour = CheckerColour.Red;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -90,13 +95,13 @@ namespace AICheckers
             //Draw possible moves
             foreach (Move move in possibleMoves)
             {
-                e.Graphics.FillRectangle(Brushes.Yellow, move.Destination.X * squareWidth, move.Destination.Y * squareWidth, squareWidth, squareWidth);
+                e.Graphics.FillRectangle(Brushes.LightBlue, move.Destination.X * squareWidth, move.Destination.Y * squareWidth, squareWidth, squareWidth);
             }
 
             //Draw selected checker
             if (selectedChecker.X >= 0 && selectedChecker.Y >= 0)
             {
-                e.Graphics.FillRectangle(Brushes.Red, selectedChecker.X * squareWidth, selectedChecker.Y * squareWidth, squareWidth, squareWidth);
+                e.Graphics.FillRectangle(Brushes.DarkKhaki, selectedChecker.X * squareWidth, selectedChecker.Y * squareWidth, squareWidth, squareWidth);
             }
 
             //Draw Border
@@ -111,7 +116,7 @@ namespace AICheckers
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    if (Board[i,j].Colour == CheckerColour.Red)
+                    if (Board[i, j].Colour == CheckerColour.Red)
                     {
                         if (Board[i, j].King)
                         {
@@ -137,7 +142,7 @@ namespace AICheckers
             }
 
         }
-        
+
         protected override void OnMouseClick(MouseEventArgs e)
         {
             int clickedX = (int)(((double)e.X / (double)Width) * 8.0d);
@@ -149,7 +154,7 @@ namespace AICheckers
             if (Board[clickedY, clickedX].Colour != CheckerColour.Empty
                 && Board[clickedY, clickedX].Colour != currentTurn)
                 return;
-          
+
             //Determine if this is a move or checker selection
             List<Move> matches = possibleMoves.Where(m => m.Destination == clickedPoint).ToList<Move>();
             if (matches.Count > 0)
@@ -164,18 +169,17 @@ namespace AICheckers
                 selectedChecker.Y = clickedY;
                 possibleMoves.Clear();
 
-                Console.WriteLine("Selected Checker: {0}",selectedChecker.ToString());
+                Console.WriteLine("Selected Checker: {0}", selectedChecker.ToString());
                 Move[] OpenSquares = Utils.GetOpenSquares(Board, selectedChecker);
                 possibleMoves.AddRange(OpenSquares);
                 this.Invalidate();
-            }            
+            }
         }
-     
+
         private void MoveChecker(Move move)
         {
             Console.WriteLine(move.ToString());
-
-
+                       
             Board[move.Destination.Y, move.Destination.X].Colour = Board[move.Source.Y, move.Source.X].Colour;
             Board[move.Destination.Y, move.Destination.X].King = Board[move.Source.Y, move.Source.X].King;
             ResetSquare(move.Source);
@@ -196,9 +200,37 @@ namespace AICheckers
             }
             possibleMoves.Clear();
 
-            this.Invalidate();
 
+            int reds = AI_Tree.getAllPosition(Board, CheckerColour.Red).Count;
+            int blacks = AI_Tree.getAllPosition(Board, CheckerColour.Black).Count;
+
+            Label redslb = (Label)Application.OpenForms["FormMain"].Controls.Find("redsNum", false).FirstOrDefault();
+            Label blackslb = (Label)Application.OpenForms["FormMain"].Controls.Find("blacksNum", false).FirstOrDefault();
+
+            redslb.Text = reds.ToString();
+            blackslb.Text = blacks.ToString();
+
+            if (AI_Tree.getAllPosition(Board, CheckerColour.Red).Count == 0)
+            {
+                DialogResult blackWins = new WinLose("Better luck next time", "You lost!").ShowDialog();
+                if (blackWins == DialogResult.Yes)
+                {
+                    Application.Restart();
+                }
+            }
+            else if (AI_Tree.getAllPosition(Board, CheckerColour.Black).Count == 0)
+            {
+                DialogResult redWins = new WinLose("Congratulations!", "You win!").ShowDialog();
+                if (redWins == DialogResult.Yes)
+                {
+                    Application.Restart();
+                }
+            }
+
+            // AI pravi potez
             AdvanceTurn();
+
+            this.Refresh();
         }
 
         private void ResetSquare(Point square)
@@ -208,21 +240,144 @@ namespace AICheckers
             Board[square.Y, square.X].King = false;
         }
 
-        private void AdvanceTurn()
+        public void AITurn()
         {
-            if (currentTurn == CheckerColour.Red)
+            AITurnBool = true;
+            currentTurn = CheckerColour.Red;
+
+            this.Refresh();
+
+            if (AI2 != null && AI2.Colour == currentTurn)
             {
+                Board = AI2.MinMax2(Board).Key;
+
+                this.Refresh();
+                int reds = AI_Tree.getAllPosition(Board, CheckerColour.Red).Count;
+                int blacks = AI_Tree.getAllPosition(Board, CheckerColour.Black).Count;
+
+                Label redslb = (Label)Application.OpenForms["FormMain"].Controls.Find("redsNum", false).FirstOrDefault();
+                Label blackslb = (Label)Application.OpenForms["FormMain"].Controls.Find("blacksNum", false).FirstOrDefault();
+
+                redslb.Text = reds.ToString();
+                blackslb.Text = blacks.ToString();
+                /*
+                Label moveBlack = (Label)Application.OpenForms["FormMain"].Controls.Find("labelMove", false).FirstOrDefault();
+                moveBlack.Text = "Move: BLACK";
+                */
+
+                if (AI_Tree.getAllPosition(Board, CheckerColour.Red).Count == 0)
+                {
+                    DialogResult blackWins = new WinLose("Black wins", "Black wins!").ShowDialog();
+                    if (blackWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
+                else if (AI_Tree.getAllMoves(Board, CheckerColour.Black).Count == 0)
+                {
+                    DialogResult redWins = new WinLose("Red wins", "Red wins!").ShowDialog();
+                    if (redWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
+                else if (AI_Tree.getAllPosition(Board, CheckerColour.Black).Count == 0)
+                {
+                    DialogResult redWins = new WinLose("Red wins!", "Red wins!").ShowDialog();
+                    if (redWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
+                else if (AI_Tree.getAllMoves(Board, CheckerColour.Red).Count == 0)
+                {
+                    DialogResult redWins = new WinLose("Black wins", "Black wins!").ShowDialog();
+                    if (redWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
+                
                 currentTurn = CheckerColour.Black;
             }
-            else
+
+            AdvanceTurn();
+        }
+
+
+        private void AdvanceTurn()
+        {
+            
+       //     Label moveRed = (Label)Application.OpenForms["FormMain"].Controls.Find("labelMove", false).FirstOrDefault();
+      //      moveRed.Text = "RED";
+            
+            if (!AITurnBool)
             {
-                currentTurn = CheckerColour.Red;
+                if (currentTurn == CheckerColour.Red)
+                {
+                    currentTurn = CheckerColour.Black;
+                  //  Label moveBlack = (Label)Application.OpenForms["FormMain"].Controls.Find("labelMove", false).FirstOrDefault();
+                  //  moveBlack.Text = "BLACK";
+                }
+                else
+                {
+                    currentTurn = CheckerColour.Red;
+                }
             }
+            this.Refresh();
 
             if (AI != null && AI.Colour == currentTurn)
             {
                 Board = AI.MinMax(Board).Key;
+
+                this.Refresh();
+                int reds = AI_Tree.getAllPosition(Board, CheckerColour.Red).Count;
+                int blacks = AI_Tree.getAllPosition(Board, CheckerColour.Black).Count;
+
+                Label redslb = (Label)Application.OpenForms["FormMain"].Controls.Find("redsNum", false).FirstOrDefault();
+                Label blackslb = (Label)Application.OpenForms["FormMain"].Controls.Find("blacksNum", false).FirstOrDefault();
+
+                redslb.Text = reds.ToString();
+                blackslb.Text = blacks.ToString();
+                /*
+                Label moveBlack = (Label)Application.OpenForms["FormMain"].Controls.Find("labelMove", false).FirstOrDefault();
+                moveBlack.Text = "Move: BLACK";
+                */
+                if (AI_Tree.getAllPosition(Board, CheckerColour.Red).Count == 0)
+                {
+                    DialogResult blackWins = new WinLose("Better luck next time", "You lost!").ShowDialog();
+                    if (blackWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
+                else if (AI_Tree.getAllMoves(Board, CheckerColour.Black).Count == 0)
+                {
+                    DialogResult redWins = new WinLose("Red wins!", "Black has no more moves! Red wins!").ShowDialog();
+                    if (redWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
+                else if (AI_Tree.getAllMoves(Board, CheckerColour.Red).Count == 0)
+                {
+                    DialogResult redWins = new WinLose("Black wins", "Red has no more moves! Black wins!").ShowDialog();
+                    if (redWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
+                else if (AI_Tree.getAllPosition(Board, CheckerColour.Black).Count == 0)
+                {
+                    DialogResult redWins = new WinLose("Congratulations!", "You win!").ShowDialog();
+                    if (redWins == DialogResult.Yes)
+                    {
+                        Application.Restart();
+                    }
+                }
                 currentTurn = CheckerColour.Red;
+                if (AITurnBool)
+                    AITurn();
             }
         }
     }
