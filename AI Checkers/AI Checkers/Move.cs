@@ -7,7 +7,7 @@ using System.Drawing;
 namespace AICheckers
 {
     class Move
-    {
+    { 
         public Move()
         {
         }

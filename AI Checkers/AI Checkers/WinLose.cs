@@ -12,7 +12,7 @@ namespace AICheckers
     public partial class WinLose : Form
     {
         public WinLose(String title, String label)
-        {
+        { 
             InitializeComponent();
             this.Text = title;
             this.label1.Text = label;

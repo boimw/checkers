@@ -5,7 +5,7 @@ using System.Text;
 using System.Drawing;
 
 namespace AICheckers
-{
+{ 
     static class Utils
     {
         //Convenience method

@@ -62,7 +62,6 @@ namespace AICheckers
                     }
                 }
             }
-
             AI = new AI_Tree();
             AI.Colour = CheckerColour.Black;
             AI2 = new AI_Tree();

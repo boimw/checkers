@@ -18,7 +18,7 @@ namespace AICheckers
 
         private void About_TextChanged(object sender, EventArgs e)
         {
-            String text = "Jana je car.";
+            String text = "Jana je car!";
             textBox1.Text = text;
         }
     }

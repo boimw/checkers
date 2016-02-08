@@ -13,7 +13,7 @@ namespace AICheckers
     {
         public Tutorial()
         {
-            InitializeComponent();
+            InitializeComponent(); 
         }
     }
 }

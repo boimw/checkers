@@ -213,20 +213,16 @@ namespace AICheckers
             int redkings = 0;
             int blackkings = 0;
             foreach (Point p in redPieces)
-            {
-                
+            {  
                     reds++;
                     if (Board[p.Y, p.X].King)
-                        redkings++;
-                
+                        redkings++;   
             }
             foreach (Point p in blackPieces)
             {
-                
                     blacks++;
                     if (Board[p.Y, p.X].King)
-                        blackkings++;
-                
+                        blackkings++;   
             }
 
             float distance = 0.0f;

@@ -13,7 +13,7 @@ namespace AICheckers
     {
         public WarningRestart()
         {
-            InitializeComponent();
+            InitializeComponent(); 
         }
 
         private void buttonNo_Click(object sender, EventArgs e)

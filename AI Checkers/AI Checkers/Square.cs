@@ -15,6 +15,6 @@ namespace AICheckers
     class Square
     {
         public CheckerColour Colour = CheckerColour.Empty;
-        public bool King = false;
+        public bool King = false; 
     }
 }

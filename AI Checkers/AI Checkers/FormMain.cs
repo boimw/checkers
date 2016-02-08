@@ -67,7 +67,7 @@ namespace AICheckers
         {
             Tutorial t = new Tutorial();
             t.ShowDialog();
-        }
+        } 
 
     }
 }
